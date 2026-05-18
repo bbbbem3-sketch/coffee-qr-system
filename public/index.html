@@ -1,3 +1,4 @@
+cat > public/index.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,24 +11,34 @@
         .container { max-width: 1000px; margin: 0 auto; }
         h1 { text-align: center; color: white; margin-bottom: 30px; font-size: 2.5rem; }
         .tabs { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap; }
-        .tab-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 12px 30px; border-radius: 30px; color: white; font-size: 16px; cursor: pointer; }
-        .tab-btn.active { background: white; color: #1a1a2e; }
+        .tab-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 12px 30px; border-radius: 30px; color: white; font-size: 16px; cursor: pointer; transition: all 0.3s; }
+        .tab-btn.active, .tab-btn:hover { background: white; color: #1a1a2e; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .card { background: white; border-radius: 24px; padding: 30px; margin-bottom: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
         .card h2 { color: #333; margin-bottom: 20px; }
+        .card h3 { color: #555; margin: 15px 0 10px; font-size: 1.2rem; }
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
         input, select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px 30px; border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; }
         .btn-secondary { background: #f0f0f0; color: #333; width: auto; padding: 8px 20px; margin: 5px; }
+        .btn-danger { background: #dc3545; color: white; width: auto; padding: 8px 20px; margin: 5px; }
+        .btn-small { background: #667eea; color: white; padding: 6px 15px; font-size: 13px; width: auto; margin: 0 5px; }
         .result { margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 16px; display: none; text-align: center; }
         .result.show { display: block; }
         .preview img { max-width: 200px; border: 1px solid #ddd; border-radius: 12px; padding: 10px; background: white; margin: 10px; }
-        .code-item { background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .code-item { background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 10px; border-left: 4px solid #667eea; }
+        .code-info { margin-bottom: 10px; }
+        .code-shortcode { font-family: monospace; font-weight: bold; font-size: 14px; color: #667eea; }
+        .code-dest { font-size: 12px; color: #666; margin-top: 5px; word-break: break-all; }
+        .code-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .edit-input { flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 5px; font-size: 12px; }
         .preset-colors { display: flex; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
-        .preset-btn { background: #f0f0f0; border: 1px solid #ddd; padding: 8px 16px; border-radius: 25px; cursor: pointer; }
+        .preset-btn { background: #f0f0f0; border: 1px solid #ddd; padding: 8px 16px; border-radius: 25px; cursor: pointer; font-size: 13px; }
+        .success-message { background: #d4edda; color: #155724; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: none; }
+        .success-message.show { display: block; }
         @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } h1 { font-size: 1.8rem; } }
     </style>
 </head>
@@ -38,7 +49,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('qr')">📱 QR Code</button>
             <button class="tab-btn" onclick="showTab('barcode')">📊 Barcode</button>
-            <button class="tab-btn" onclick="showTab('manage')">📋 Manage</button>
+            <button class="tab-btn" onclick="showTab('manage')">📋 Manage QR Codes</button>
         </div>
         
         <!-- QR Code Tab -->
@@ -101,11 +112,13 @@
             </div>
         </div>
         
-        <!-- Manage Tab -->
+        <!-- Manage QR Codes Tab -->
         <div id="manage-tab" class="tab-content">
             <div class="card">
-                <h2>📋 Manage Generated Codes</h2>
-                <button class="btn-secondary" onclick="loadAllCodes()" style="margin-bottom: 15px;">🔄 Refresh</button>
+                <h2>📋 Manage QR Codes</h2>
+                <p>Change destination URLs for existing QR codes without regenerating</p>
+                <div id="success-message" class="success-message"></div>
+                <button class="btn-secondary" onclick="loadQRCodes()" style="margin-bottom: 15px;">🔄 Refresh List</button>
                 <div id="codes-list">Loading...</div>
             </div>
         </div>
@@ -121,7 +134,16 @@
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`${tabName}-tab`).classList.add('active');
             event.target.classList.add('active');
-            if (tabName === 'manage') loadAllCodes();
+            if (tabName === 'manage') loadQRCodes();
+        }
+        
+        function showMessage(msg, isSuccess = true) {
+            const msgDiv = document.getElementById('success-message');
+            msgDiv.textContent = msg;
+            msgDiv.style.background = isSuccess ? '#d4edda' : '#f8d7da';
+            msgDiv.style.color = isSuccess ? '#155724' : '#721c24';
+            msgDiv.classList.add('show');
+            setTimeout(() => msgDiv.classList.remove('show'), 3000);
         }
         
         // Preset colors
@@ -173,10 +195,11 @@
                 `;
                 document.getElementById('qr-result').classList.add('show');
                 
-                loadAllCodes();
+                loadQRCodes();
+                showMessage('✅ QR Code generated successfully!');
                 
             } catch (error) {
-                alert('Error: ' + error.message);
+                showMessage('❌ Error: ' + error.message, false);
             } finally {
                 btn.disabled = false;
                 btn.textContent = '🚀 Generate QR Code';
@@ -231,10 +254,10 @@
                 `;
                 document.getElementById('barcode-result').classList.add('show');
                 
-                loadAllCodes();
+                showMessage('✅ Barcode generated successfully!');
                 
             } catch (error) {
-                alert('Error: ' + error.message);
+                showMessage('❌ Error: ' + error.message, false);
             } finally {
                 btn.disabled = false;
                 btn.textContent = '🚀 Generate Barcode';
@@ -250,71 +273,103 @@
             }
         }
         
-        // Load all codes
-        async function loadAllCodes() {
+        // Load QR Codes for Management
+        async function loadQRCodes() {
             try {
-                const [qrRes, barRes] = await Promise.all([
-                    fetch(`${baseUrl}/api/qr/list`),
-                    fetch(`${baseUrl}/api/barcode/list`)
-                ]);
+                const response = await fetch(`${baseUrl}/api/qr/list`);
+                const data = await response.json();
                 
-                const qrData = await qrRes.json();
-                const barData = await barRes.json();
-                
-                let html = '<h3>QR Codes</h3>';
-                if (qrData.codes?.length) {
-                    qrData.codes.forEach(code => {
-                        html += `<div class="code-item">
-                            <div><strong>📱 ${code.short_code}</strong><br><small>${code.destination_url}</small></div>
-                            <button class="btn-secondary" onclick="deleteQR('${code.short_code}')">Delete</button>
-                        </div>`;
-                    });
-                } else {
-                    html += '<p>No QR codes yet</p>';
+                if (!data.codes || data.codes.length === 0) {
+                    document.getElementById('codes-list').innerHTML = '<p>No QR codes yet. Generate your first one!</p>';
+                    return;
                 }
                 
-                html += '<h3 style="margin-top: 20px;">📊 Barcodes</h3>';
-                if (barData.codes?.length) {
-                    barData.codes.forEach(code => {
-                        html += `<div class="code-item">
-                            <div><strong>📊 ${code.short_code}</strong><br><small>Value: ${code.value} | Type: ${code.type}</small></div>
-                            <button class="btn-secondary" onclick="deleteBarcode('${code.short_code}')">Delete</button>
-                        </div>`;
-                    });
-                } else {
-                    html += '<p>No barcodes yet</p>';
+                let html = '';
+                for (const code of data.codes) {
+                    html += `
+                        <div class="code-item" id="code-${code.short_code}">
+                            <div class="code-info">
+                                <div class="code-shortcode">📱 ${code.short_code}</div>
+                                <div class="code-dest">🎯 Current: ${code.destination_url}</div>
+                                <div class="code-dest">📅 Created: ${new Date(code.created_at).toLocaleString()}</div>
+                            </div>
+                            <div class="code-actions">
+                                <input type="text" id="edit-${code.short_code}" class="edit-input" placeholder="New destination URL" value="${code.destination_url}">
+                                <button class="btn-small" onclick="updateDestination('${code.short_code}')">✏️ Update</button>
+                                <button class="btn-small" onclick="deleteQRCode('${code.short_code}')" style="background:#dc3545;">🗑️ Delete</button>
+                            </div>
+                        </div>
+                    `;
                 }
-                
                 document.getElementById('codes-list').innerHTML = html;
                 
             } catch (error) {
-                document.getElementById('codes-list').innerHTML = '<p>Error loading codes</p>';
+                document.getElementById('codes-list').innerHTML = '<p>Error loading codes. Make sure server is running.</p>';
             }
         }
         
-        async function deleteQR(shortCode) {
-            if (!confirm('Delete this QR code?')) return;
+        // UPDATE DESTINATION - This is the key feature!
+        async function updateDestination(shortCode) {
+            const newUrl = document.getElementById(`edit-${shortCode}`).value;
+            
+            if (!newUrl) {
+                showMessage('Please enter a destination URL', false);
+                return;
+            }
+            
+            if (!newUrl.startsWith('http://') && !newUrl.startsWith('https://')) {
+                showMessage('URL must start with http:// or https://', false);
+                return;
+            }
+            
             try {
-                await fetch(`${baseUrl}/api/qr/delete/${shortCode}`, { method: 'DELETE' });
-                loadAllCodes();
+                const response = await fetch(`${baseUrl}/api/qr/update/${shortCode}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ destinationUrl: newUrl })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(`✅ Updated ${shortCode} → ${newUrl}`);
+                    loadQRCodes(); // Refresh the list
+                } else {
+                    showMessage('❌ Update failed: ' + (data.error || 'Unknown error'), false);
+                }
+                
             } catch (error) {
-                alert('Error deleting');
+                showMessage('❌ Error: ' + error.message, false);
             }
         }
         
-        async function deleteBarcode(shortCode) {
-            if (!confirm('Delete this barcode?')) return;
+        // Delete QR Code
+        async function deleteQRCode(shortCode) {
+            if (!confirm(`Delete QR code "${shortCode}"? This cannot be undone.`)) return;
+            
             try {
-                await fetch(`${baseUrl}/api/barcode/delete/${shortCode}`, { method: 'DELETE' });
-                loadAllCodes();
+                const response = await fetch(`${baseUrl}/api/qr/delete/${shortCode}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(`✅ Deleted ${shortCode}`);
+                    loadQRCodes(); // Refresh the list
+                } else {
+                    showMessage('❌ Delete failed', false);
+                }
+                
             } catch (error) {
-                alert('Error deleting');
+                showMessage('❌ Error: ' + error.message, false);
             }
         }
         
         // Initialize
-        loadAllCodes();
-        console.log('✅ QR & Barcode System Ready');
+        loadQRCodes();
+        console.log('✅ QR & Barcode System Ready with Manage Feature');
     </script>
 </body>
 </html>
+EOF

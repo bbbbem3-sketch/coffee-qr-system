@@ -1,3 +1,4 @@
+cat > api/index.js << 'EOF'
 const express = require('express');
 const cors = require('cors');
 const QRCode = require('qrcode');
@@ -43,6 +44,11 @@ app.post('/api/qr/generate', async (req, res) => {
         
         const finalShortCode = shortCode || generateShortCode('qr');
         
+        // Check for duplicate
+        if (qrCodes.find(c => c.shortCode === finalShortCode)) {
+            return res.status(400).json({ error: 'Short code already exists' });
+        }
+        
         // Generate QR code
         const qrBuffer = await QRCode.toBuffer(destinationUrl, {
             type: 'png',
@@ -86,6 +92,35 @@ app.get('/api/qr/list', (req, res) => {
         created_at: c.createdAt
     }));
     res.json({ success: true, codes });
+});
+
+// UPDATE QR CODE DESTINATION (NEW)
+app.put('/api/qr/update/:shortCode', (req, res) => {
+    try {
+        const { shortCode } = req.params;
+        const { destinationUrl } = req.body;
+        
+        if (!destinationUrl) {
+            return res.status(400).json({ error: 'Destination URL is required' });
+        }
+        
+        const code = qrCodes.find(c => c.shortCode === shortCode);
+        if (!code) {
+            return res.status(404).json({ error: 'QR code not found' });
+        }
+        
+        code.destinationUrl = destinationUrl;
+        
+        res.json({ 
+            success: true, 
+            message: `Updated ${shortCode} to ${destinationUrl}`,
+            destinationUrl: destinationUrl
+        });
+        
+    } catch (error) {
+        console.error('Update error:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Delete QR code
@@ -190,6 +225,7 @@ app.get('/api/r/:shortCode', (req, res) => {
     const qrData = qrCodes.find(c => c.shortCode === shortCode);
     
     if (qrData) {
+        // Increment scan count (optional)
         res.redirect(qrData.destinationUrl);
     } else {
         res.redirect('https://dynamic-qr-system-xi.vercel.app/luban-coffee.html');
@@ -197,3 +233,4 @@ app.get('/api/r/:shortCode', (req, res) => {
 });
 
 module.exports = app;
+EOF
