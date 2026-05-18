@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// In-memory storage (will persist between requests on Vercel's serverless)
+// Simple in-memory storage
 let qrCodes = [];
 
 // ============================================
@@ -16,9 +16,7 @@ let qrCodes = [];
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'ok', 
-        timestamp: new Date().toISOString(),
-        message: 'QR System is running',
-        codesCount: qrCodes.length
+        timestamp: new Date().toISOString()
     });
 });
 
@@ -29,17 +27,25 @@ app.post('/api/qr/generate', async (req, res) => {
     try {
         const { destinationUrl, shortCode, qrDarkColor = '#000000', qrLightColor = '#FFFFFF' } = req.body;
         
+        console.log('Generate request:', { destinationUrl, shortCode });
+        
         if (!destinationUrl) {
             return res.status(400).json({ error: 'Destination URL is required' });
         }
         
-        // Use the destination URL directly in the QR code
-        const qrContent = destinationUrl;
+        // Generate short code if not provided
+        let finalShortCode = shortCode;
+        if (!finalShortCode) {
+            finalShortCode = 'code_' + Date.now();
+        }
         
-        console.log('📱 Generating QR for:', qrContent);
+        // Check for duplicate
+        if (qrCodes.find(c => c.shortCode === finalShortCode)) {
+            return res.status(400).json({ error: 'Short code already exists' });
+        }
         
-        // Generate QR code
-        const qrBuffer = await QRCode.toBuffer(qrContent, {
+        // Generate QR code with destination URL directly
+        const qrBuffer = await QRCode.toBuffer(destinationUrl, {
             type: 'png',
             width: 500,
             margin: 2,
@@ -50,22 +56,18 @@ app.post('/api/qr/generate', async (req, res) => {
         const qrBase64 = qrBuffer.toString('base64');
         
         // Store for management
-        const finalShortCode = shortCode || `code_${qrCodes.length + 1}`;
         qrCodes.push({
             shortCode: finalShortCode,
-            destinationUrl,
+            destinationUrl: destinationUrl,
             scanCount: 0,
-            createdAt: new Date().toISOString(),
-            qrDarkColor,
-            qrLightColor
+            createdAt: new Date().toISOString()
         });
         
         res.json({
             success: true,
             shortCode: finalShortCode,
             qrImage: `data:image/png;base64,${qrBase64}`,
-            destinationUrl: destinationUrl,
-            scanUrl: destinationUrl
+            destinationUrl: destinationUrl
         });
         
     } catch (error) {
@@ -75,10 +77,11 @@ app.post('/api/qr/generate', async (req, res) => {
 });
 
 // ============================================
-// LIST ALL CODES (for Manage tab)
+// LIST ALL CODES
 // ============================================
 app.get('/api/qr/list', (req, res) => {
     try {
+        console.log('Listing codes, count:', qrCodes.length);
         const codes = qrCodes.map(c => ({
             short_code: c.shortCode,
             destination_url: c.destinationUrl,
@@ -87,6 +90,7 @@ app.get('/api/qr/list', (req, res) => {
         }));
         res.json({ success: true, codes });
     } catch (error) {
+        console.error('List error:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -99,6 +103,8 @@ app.put('/api/qr/update/:shortCode', (req, res) => {
         const { shortCode } = req.params;
         const { destinationUrl } = req.body;
         
+        console.log('Update:', shortCode, destinationUrl);
+        
         const code = qrCodes.find(c => c.shortCode === shortCode);
         if (!code) {
             return res.status(404).json({ error: 'Code not found' });
@@ -108,6 +114,7 @@ app.put('/api/qr/update/:shortCode', (req, res) => {
         res.json({ success: true, message: `Updated ${shortCode}` });
         
     } catch (error) {
+        console.error('Update error:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -128,6 +135,7 @@ app.delete('/api/qr/delete/:shortCode', (req, res) => {
         res.json({ success: true, message: `Deleted ${shortCode}` });
         
     } catch (error) {
+        console.error('Delete error:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -149,25 +157,17 @@ app.get('/api/qr/stats/:shortCode', (req, res) => {
 });
 
 // ============================================
-// SIMPLE REDIRECT (for compatibility)
+// REDIRECT (for QR codes that use short code)
 // ============================================
 app.get('/api/r/:shortCode', (req, res) => {
     const { shortCode } = req.params;
     const code = qrCodes.find(c => c.shortCode === shortCode);
     
     if (code) {
+        code.scanCount++;
         res.redirect(code.destinationUrl);
     } else {
-        res.send(`
-            <html>
-            <body style="font-family: Arial; text-align: center; padding: 50px;">
-                <h1>☕ Luban Coffee</h1>
-                <p>QR Code: ${shortCode}</p>
-                <p>This QR code uses direct URL encoding.</p>
-                <a href="/test.html">Generate new QR codes</a>
-            </body>
-            </html>
-        `);
+        res.redirect('https://dynamic-qr-system-xi.vercel.app/luban-coffee.html');
     }
 });
 
