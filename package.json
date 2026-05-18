@@ -1,17 +1,13 @@
 {
-    "name": "coffee-qr-system",
+    "name": "dynamic-qr-system",
     "version": "1.0.0",
-    "description": "Professional QR + Barcode Generator for Coffee Bags",
-    "main": "api/index.js",
     "scripts": {
-        "dev": "node api/index.js",
-        "start": "node api/index.js"
+        "vercel-build": "npm install"
     },
     "dependencies": {
-        "bwip-js": "^4.0.0",
-        "cors": "^2.8.6",
-        "express": "^4.22.2",
-        "qrcode": "^1.5.4",
-        "uuid": "^9.0.1"
+        "express": "^4.18.2",
+        "cors": "^2.8.5",
+        "qrcode": "^1.5.3",
+        "bwip-js": "^4.0.0"
     }
 }
