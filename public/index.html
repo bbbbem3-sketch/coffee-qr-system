@@ -1,210 +1,160 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    min-height: 100vh;
-    padding: 20px;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-header {
-    text-align: center;
-    color: white;
-    margin-bottom: 40px;
-}
-
-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-}
-
-.tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 30px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.tab-btn {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    padding: 12px 30px;
-    border-radius: 30px;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.tab-btn.active, .tab-btn:hover {
-    background: white;
-    color: #1a1a2e;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-.card {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    margin-bottom: 30px;
-}
-
-.card h2 {
-    color: #333;
-    margin-bottom: 20px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #555;
-}
-
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 16px;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.color-section {
-    background: #f8f9fa;
-    border-radius: 16px;
-    padding: 20px;
-    margin: 20px 0;
-}
-
-.color-section h3 {
-    margin-bottom: 15px;
-}
-
-.preset-colors {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 15px 0;
-}
-
-.preset-btn {
-    background: #f0f0f0;
-    border: 1px solid #ddd;
-    padding: 8px 16px;
-    border-radius: 25px;
-    cursor: pointer;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 14px 30px;
-    border-radius: 30px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-}
-
-.btn-secondary {
-    background: #f0f0f0;
-    color: #333;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 25px;
-    cursor: pointer;
-}
-
-.button-group {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-.result-card {
-    background: #f8f9fa;
-    border-radius: 20px;
-    padding: 30px;
-    margin-top: 30px;
-}
-
-.result-card h3 {
-    color: #28a745;
-    margin-bottom: 20px;
-}
-
-.progress-bar {
-    background: #e0e0e0;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.code-item {
-    background: #f8f9fa;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.stat-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 15px;
-    text-align: center;
-}
-
-.stat-number {
-    font-size: 2rem;
-    font-weight: bold;
-}
-
-@media (max-width: 768px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-    header h1 {
-        font-size: 1.8rem;
-    }
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional QR + Barcode Generator | Coffee Bag System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>☕ Professional QR + Barcode Generator</h1>
+            <p>CMYK • RGB • HEX • Professional Print Production</p>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('generate')">✨ Generate</button>
+            <button class="tab-btn" onclick="showTab('batch')">📦 Batch</button>
+            <button class="tab-btn" onclick="showTab('manage')">📋 Manage</button>
+            <button class="tab-btn" onclick="showTab('stats')">📊 Stats</button>
+        </div>
+        
+        <!-- Generate Tab -->
+        <div id="generate-tab" class="tab-content active">
+            <div class="card">
+                <h2>Create Single QR Code + Barcode</h2>
+                
+                <div class="form-group">
+                    <label>Destination URL *</label>
+                    <input type="url" id="dest-url" placeholder="https://yourcoffee.com/promotion">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Short Code (optional)</label>
+                        <input type="text" id="short-code" placeholder="COFFEE001">
+                    </div>
+                    <div class="form-group">
+                        <label>Barcode Value (optional)</label>
+                        <input type="text" id="barcode-value" placeholder="COFFEE-000001">
+                    </div>
+                </div>
+                
+                <!-- QR Colors -->
+                <div class="color-section">
+                    <h3>📱 QR Code Colors</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>QR Dark Color</label>
+                            <input type="color" id="qr-dark" value="#4A2C1A">
+                        </div>
+                        <div class="form-group">
+                            <label>QR Light Color</label>
+                            <input type="color" id="qr-light" value="#F5E6D3">
+                        </div>
+                        <div class="form-group">
+                            <label>Barcode Color</label>
+                            <input type="color" id="barcode-color" value="#000000">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="preset-colors">
+                    <button type="button" class="preset-btn" data-dark="#000000" data-light="#FFFFFF" data-barcode="#000000">⚫ Black & White</button>
+                    <button type="button" class="preset-btn" data-dark="#4A2C1A" data-light="#F5E6D3" data-barcode="#4A2C1A">☕ Coffee Brown</button>
+                    <button type="button" class="preset-btn" data-dark="#2E7D32" data-light="#FFFFFF" data-barcode="#2E7D32">🌿 Forest Green</button>
+                </div>
+                
+                <button class="btn-primary" onclick="generateSingle()">🚀 Generate</button>
+            </div>
+            
+            <div id="result" class="result-card" style="display: none;">
+                <h3>✅ Generated Successfully!</h3>
+                <div id="result-content"></div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="downloadQR()">📥 Download QR (PNG)</button>
+                    <button class="btn-secondary" onclick="downloadBarcode()">📥 Download Barcode (PNG)</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Batch Tab -->
+        <div id="batch-tab" class="tab-content">
+            <div class="card">
+                <h2>📦 Batch Generator</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Prefix</label>
+                        <input type="text" id="batch-prefix" value="COFFEE">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Number</label>
+                        <input type="number" id="batch-start" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>End Number</label>
+                        <input type="number" id="batch-end" value="10">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Barcode Prefix</label>
+                    <input type="text" id="batch-barcode-prefix" placeholder="COFFEE-">
+                </div>
+                
+                <div class="color-section">
+                    <h3>🎨 Batch Colors</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>QR Dark Color</label>
+                            <input type="color" id="batch-qr-dark" value="#4A2C1A">
+                        </div>
+                        <div class="form-group">
+                            <label>QR Light Color</label>
+                            <input type="color" id="batch-qr-light" value="#F5E6D3">
+                        </div>
+                        <div class="form-group">
+                            <label>Barcode Color</label>
+                            <input type="color" id="batch-barcode-color" value="#000000">
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn-primary" onclick="generateBatch()">🚀 Generate Batch</button>
+                
+                <div id="batch-progress" style="display: none; margin-top: 20px;">
+                    <div class="progress-bar"><div id="progress-fill" style="width: 0%; height: 8px; background: #28a745;"></div></div>
+                    <p id="progress-text">Generating...</p>
+                </div>
+                
+                <div id="batch-result" style="display: none;">
+                    <a id="download-batch-zip" class="btn-primary">📥 Download All (ZIP)</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Manage Tab -->
+        <div id="manage-tab" class="tab-content">
+            <div class="card">
+                <h2>📋 Manage QR Codes</h2>
+                <div id="codes-list">Loading...</div>
+            </div>
+        </div>
+        
+        <!-- Stats Tab -->
+        <div id="stats-tab" class="tab-content">
+            <div class="card">
+                <h2>📊 Scan Statistics</h2>
+                <select id="stats-select" onchange="loadStats()">
+                    <option>-- Select --</option>
+                </select>
+                <div id="stats-content"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

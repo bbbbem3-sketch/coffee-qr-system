@@ -1,17 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const QRCode = require('qrcode');
-const bwipjs = require('bwip-js');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// In-memory storage for Vercel (use a real DB for production)
+// Simple in-memory storage
 let qrCodes = [];
 
-// Generate short code
 function generateShortCode(length = 8) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
@@ -22,20 +20,41 @@ function generateShortCode(length = 8) {
 }
 
 // ============================================
-// GENERATE QR + BARCODE
+// HEALTH CHECK (MUST WORK)
 // ============================================
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        message: 'QR System is running'
+    });
+});
 
+// ============================================
+// ROOT ENDPOINT (for testing)
+// ============================================
+app.get('/api', (req, res) => {
+    res.json({ 
+        message: 'QR API is working',
+        endpoints: [
+            'GET  /api/health',
+            'POST /api/qr/generate',
+            'GET  /api/r/:code',
+            'GET  /api/qr/list',
+            'PUT  /api/qr/update/:code',
+            'DELETE /api/qr/delete/:code'
+        ]
+    });
+});
+
+// ============================================
+// GENERATE QR CODE
+// ============================================
 app.post('/api/qr/generate', async (req, res) => {
     try {
-        const { 
-            destinationUrl, 
-            shortCode, 
-            barcodeValue, 
-            barcodeType = 'code128',
-            qrDarkColor = '#000000',
-            qrLightColor = '#FFFFFF',
-            barcodeColor = '#000000'
-        } = req.body;
+        console.log('📝 Generate request received:', req.body);
+        
+        const { destinationUrl, shortCode, qrDarkColor = '#000000', qrLightColor = '#FFFFFF' } = req.body;
         
         if (!destinationUrl) {
             return res.status(400).json({ error: 'Destination URL is required' });
@@ -43,16 +62,20 @@ app.post('/api/qr/generate', async (req, res) => {
         
         let finalShortCode = shortCode || generateShortCode();
         
-        // Check if exists
+        // Check for duplicate
         if (qrCodes.find(c => c.shortCode === finalShortCode)) {
             return res.status(400).json({ error: 'Short code already exists' });
         }
         
-        const id = uuidv4();
-        const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
-        const qrContent = `${baseUrl}/api/r/${finalShortCode}`;
+        // Get base URL
+        const baseUrl = process.env.VERCEL_URL 
+            ? `https://${process.env.VERCEL_URL}` 
+            : 'https://coffee-qr-system.vercel.app';
         
-        // Generate QR as base64
+        const qrContent = `${baseUrl}/api/r/${finalShortCode}`;
+        console.log('📱 QR Content:', qrContent);
+        
+        // Generate QR code
         const qrBuffer = await QRCode.toBuffer(qrContent, {
             type: 'png',
             width: 500,
@@ -63,51 +86,26 @@ app.post('/api/qr/generate', async (req, res) => {
         
         const qrBase64 = qrBuffer.toString('base64');
         
-        let barcodeBase64 = null;
-        if (barcodeValue) {
-            const barcodeBuffer = await new Promise((resolve, reject) => {
-                bwipjs.toBuffer({
-                    bcid: barcodeType,
-                    text: barcodeValue,
-                    scale: 3,
-                    height: 10,
-                    includetext: true,
-                    textxalign: 'center',
-                    barcolor: barcodeColor.replace('#', ''),
-                    textcolor: barcodeColor.replace('#', '')
-                }, (err, png) => {
-                    if (err) reject(err);
-                    else resolve(png);
-                });
-            });
-            barcodeBase64 = barcodeBuffer.toString('base64');
-        }
-        
-        // Save to memory
+        // Store in memory
         qrCodes.push({
-            id,
             shortCode: finalShortCode,
             destinationUrl,
-            barcodeValue,
-            qrDarkColor,
-            qrLightColor,
-            barcodeColor,
             scanCount: 0,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            qrDarkColor,
+            qrLightColor
         });
         
         res.json({
             success: true,
             shortCode: finalShortCode,
             qrImage: `data:image/png;base64,${qrBase64}`,
-            barcodeImage: barcodeBase64 ? `data:image/png;base64,${barcodeBase64}` : null,
-            barcodeValue: barcodeValue,
             destinationUrl: destinationUrl,
-            editUrl: `${baseUrl}/admin/${finalShortCode}`
+            scanUrl: qrContent
         });
         
     } catch (error) {
-        console.error('Generation error:', error);
+        console.error('❌ Generate error:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -115,97 +113,109 @@ app.post('/api/qr/generate', async (req, res) => {
 // ============================================
 // REDIRECT ENDPOINT
 // ============================================
-
-app.get('/api/r/:shortCode', async (req, res) => {
+app.get('/api/r/:shortCode', (req, res) => {
     try {
         const { shortCode } = req.params;
-        console.log(`📱 SCAN: ${shortCode}`);
+        console.log('📱 Scan request for:', shortCode);
         
         const qrData = qrCodes.find(c => c.shortCode === shortCode);
         
         if (!qrData) {
             return res.status(404).send(`
-                <!DOCTYPE html>
                 <html>
-                <head><title>QR Code Not Found</title></head>
                 <body style="font-family: Arial; text-align: center; padding: 50px;">
                     <h1>❌ QR Code Not Found</h1>
-                    <p>The code "${shortCode}" is not active or does not exist.</p>
+                    <p>Code "${shortCode}" does not exist.</p>
                 </body>
                 </html>
             `);
         }
         
         qrData.scanCount++;
-        
-        // Redirect to destination
+        console.log(`🔄 Redirecting ${shortCode} → ${qrData.destinationUrl}`);
         res.redirect(qrData.destinationUrl);
         
     } catch (error) {
-        console.error('Redirect error:', error);
+        console.error('❌ Redirect error:', error);
         res.status(500).send('Server error');
     }
 });
 
 // ============================================
-// MANAGEMENT ENDPOINTS
+// LIST ALL CODES
 // ============================================
-
 app.get('/api/qr/list', (req, res) => {
-    res.json({ 
-        success: true, 
-        codes: qrCodes.map(c => ({
+    try {
+        const codes = qrCodes.map(c => ({
             short_code: c.shortCode,
             destination_url: c.destinationUrl,
-            barcode_value: c.barcodeValue,
             scan_count: c.scanCount,
             created_at: c.createdAt
-        }))
-    });
+        }));
+        res.json({ success: true, codes });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
+// ============================================
+// UPDATE DESTINATION
+// ============================================
 app.put('/api/qr/update/:shortCode', (req, res) => {
-    const { shortCode } = req.params;
-    const { destinationUrl } = req.body;
-    
-    const code = qrCodes.find(c => c.shortCode === shortCode);
-    if (!code) {
-        return res.status(404).json({ error: 'Code not found' });
+    try {
+        const { shortCode } = req.params;
+        const { destinationUrl } = req.body;
+        
+        const code = qrCodes.find(c => c.shortCode === shortCode);
+        if (!code) {
+            return res.status(404).json({ error: 'Code not found' });
+        }
+        
+        code.destinationUrl = destinationUrl;
+        res.json({ success: true, message: `Updated ${shortCode}` });
+        
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-    
-    code.destinationUrl = destinationUrl;
-    res.json({ success: true, message: `Updated ${shortCode}` });
 });
 
+// ============================================
+// DELETE CODE
+// ============================================
 app.delete('/api/qr/delete/:shortCode', (req, res) => {
-    const { shortCode } = req.params;
-    const index = qrCodes.findIndex(c => c.shortCode === shortCode);
-    
-    if (index === -1) {
-        return res.status(404).json({ error: 'Code not found' });
+    try {
+        const { shortCode } = req.params;
+        const index = qrCodes.findIndex(c => c.shortCode === shortCode);
+        
+        if (index === -1) {
+            return res.status(404).json({ error: 'Code not found' });
+        }
+        
+        qrCodes.splice(index, 1);
+        res.json({ success: true, message: `Deleted ${shortCode}` });
+        
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-    
-    qrCodes.splice(index, 1);
-    res.json({ success: true, message: `Deleted ${shortCode}` });
 });
 
+// ============================================
+// GET STATS
+// ============================================
 app.get('/api/qr/stats/:shortCode', (req, res) => {
-    const { shortCode } = req.params;
-    const code = qrCodes.find(c => c.shortCode === shortCode);
-    
-    res.json({ 
-        success: true, 
-        stats: { total_scans: code?.scanCount || 0 }
-    });
+    try {
+        const { shortCode } = req.params;
+        const code = qrCodes.find(c => c.shortCode === shortCode);
+        res.json({ 
+            success: true, 
+            stats: { total_scans: code?.scanCount || 0 }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'ok', 
-        timestamp: new Date().toISOString(),
-        total_codes: qrCodes.length
-    });
-});
-
-// Export for Vercel
+// ============================================
+// EXPORT FOR VERCEL
+// ============================================
 module.exports = app;
