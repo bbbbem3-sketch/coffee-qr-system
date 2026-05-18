@@ -1,215 +1,53 @@
+cat > public/test.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee QR System - Test Page</title>
+    <title>Luban Coffee - QR Generator</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 24px;
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        
-        h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-            font-size: 2.5rem;
-        }
-        
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-        }
-        
-        h3 {
-            color: #555;
-            margin: 20px 0 10px;
-            font-size: 1.2rem;
-        }
-        
-        .status {
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        
-        .status.online {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .status.offline {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-        
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 14px 30px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-        }
-        
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .result {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 16px;
-            display: none;
-        }
-        
-        .result.show {
-            display: block;
-        }
-        
-        .qr-preview {
-            text-align: center;
-            margin: 20px 0;
-        }
-        
-        .qr-preview img {
-            max-width: 200px;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            padding: 10px;
-            background: white;
-        }
-        
-        .code-info {
-            font-family: monospace;
-            background: #e9ecef;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-            word-break: break-all;
-        }
-        
-        .endpoint-list {
-            background: #1e1e2e;
-            color: #fff;
-            padding: 15px;
-            border-radius: 12px;
-            font-family: monospace;
-            font-size: 13px;
-        }
-        
-        .endpoint-list a {
-            color: #667eea;
-            text-decoration: none;
-        }
-        
-        .success {
-            color: #28a745;
-            font-weight: bold;
-        }
-        
-        .error {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        
-        hr {
-            margin: 20px 0;
-            border: none;
-            border-top: 1px solid #ddd;
-        }
-        
-        .batch-result {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .batch-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            font-family: monospace;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; padding: 40px 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: white; border-radius: 24px; padding: 40px; margin-bottom: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        h1 { text-align: center; color: white; margin-bottom: 30px; font-size: 2.5rem; }
+        h2 { color: #333; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px 30px; border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; }
+        .result { margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 16px; display: none; text-align: center; }
+        .result.show { display: block; }
+        .qr-preview img { max-width: 200px; border: 1px solid #ddd; border-radius: 12px; padding: 10px; background: white; }
+        .code-info { font-family: monospace; background: #e9ecef; padding: 10px; border-radius: 8px; margin: 10px 0; word-break: break-all; }
+        .preset-colors { display: flex; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
+        .preset-btn { background: #f0f0f0; border: 1px solid #ddd; padding: 8px 16px; border-radius: 25px; cursor: pointer; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; justify-content: center; }
+        .btn-secondary { background: #f0f0f0; color: #333; padding: 10px 20px; border-radius: 25px; cursor: pointer; border: none; width: auto; }
+        .code-item { background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: bold; }
+        @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } h1 { font-size: 1.8rem; } }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>☕ Coffee QR System Test Page</h1>
+        <h1>☕ Luban Coffee - QR Generator</h1>
         
-        <!-- API Status Card -->
+        <!-- Generate Tab -->
         <div class="card">
-            <h2>🔌 API Status</h2>
-            <div id="api-status" class="status">Checking API...</div>
-            
-            <h3>📡 Available Endpoints</h3>
-            <div class="endpoint-list" id="base-url"></div>
-        </div>
-        
-        <!-- Generate Single QR Card -->
-        <div class="card">
-            <h2>✨ Generate Single QR Code</h2>
-            
+            <h2>✨ Generate QR Code</h2>
             <div class="form-group">
                 <label>Destination URL</label>
-                <input type="url" id="dest-url" placeholder="https://www.google.com" value="https://www.google.com">
+                <input type="url" id="dest-url" value="https://dynamic-qr-system-xi.vercel.app/luban-coffee.html">
             </div>
-            
             <div class="form-group">
-                <label>Short Code (leave empty for auto)</label>
-                <input type="text" id="short-code" placeholder="test123">
+                <label>Short Code (optional)</label>
+                <input type="text" id="short-code" placeholder="luban001">
             </div>
-            
-            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-row">
                 <div class="form-group">
                     <label>QR Dark Color</label>
                     <input type="color" id="qr-dark" value="#4A2C1A">
@@ -219,115 +57,42 @@
                     <input type="color" id="qr-light" value="#F5E6D3">
                 </div>
             </div>
-            
+            <div class="preset-colors">
+                <button class="preset-btn" data-dark="#4A2C1A" data-light="#F5E6D3">☕ Coffee Brown</button>
+                <button class="preset-btn" data-dark="#000000" data-light="#FFFFFF">⚫ Black & White</button>
+                <button class="preset-btn" data-dark="#2E7D32" data-light="#FFFFFF">🌿 Forest Green</button>
+            </div>
             <button onclick="generateQR()">🚀 Generate QR Code</button>
-            
-            <div id="single-result" class="result">
+            <div id="result" class="result">
                 <div id="qr-result"></div>
-                <div class="button-group" style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button onclick="downloadCurrentQR()" style="width: auto; padding: 10px 20px;">📥 Download QR</button>
-                    <button onclick="copyScanUrl()" style="width: auto; padding: 10px 20px;">📋 Copy Scan URL</button>
+                <div class="btn-group">
+                    <button class="btn-secondary" onclick="downloadQR()">📥 Download QR</button>
+                    <button class="btn-secondary" onclick="copyUrl()">📋 Copy URL</button>
                 </div>
             </div>
         </div>
         
-        <!-- Test Redirect Card -->
-        <div class="card">
-            <h2>🔄 Test Redirect</h2>
-            <div class="form-group">
-                <label>Enter Short Code</label>
-                <input type="text" id="test-code" placeholder="test123">
-            </div>
-            <button onclick="testRedirect()">🔗 Test Redirect</button>
-            <div id="redirect-result" style="margin-top: 15px;"></div>
-        </div>
-        
-        <!-- Batch Generator Card -->
-        <div class="card">
-            <h2>📦 Batch Generator</h2>
-            
-            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                <div class="form-group">
-                    <label>Prefix</label>
-                    <input type="text" id="batch-prefix" value="COFFEE">
-                </div>
-                <div class="form-group">
-                    <label>Start</label>
-                    <input type="number" id="batch-start" value="1">
-                </div>
-                <div class="form-group">
-                    <label>End</label>
-                    <input type="number" id="batch-end" value="5">
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label>Destination URL Pattern</label>
-                <input type="text" id="batch-dest" value="https://yourcoffee.com/promo/{code}">
-                <small>Use {code} as placeholder for short code</small>
-            </div>
-            
-            <button onclick="generateBatch()">🚀 Generate Batch (Max 50)</button>
-            
-            <div id="batch-result" class="result">
-                <div id="batch-progress" style="display: none;">
-                    <div class="progress-bar" style="background:#e0e0e0; border-radius:4px; overflow:hidden;">
-                        <div id="progress-fill" style="width:0%; height:8px; background:#28a745;"></div>
-                    </div>
-                    <p id="progress-text" style="margin-top:8px;">Generating...</p>
-                </div>
-                <div id="batch-codes"></div>
-            </div>
-        </div>
-        
-        <!-- Manage Codes Card -->
+        <!-- Manage Tab -->
         <div class="card">
             <h2>📋 Manage QR Codes</h2>
-            <button onclick="loadCodes()">🔄 Refresh List</button>
-            <div id="codes-list" style="margin-top: 15px;"></div>
+            <button class="btn-secondary" onclick="loadCodes()" style="width: auto; margin-bottom: 15px;">🔄 Refresh</button>
+            <div id="codes-list">Loading...</div>
+        </div>
+        
+        <!-- Stats Tab -->
+        <div class="card">
+            <h2>📊 Statistics</h2>
+            <select id="stats-select" onchange="loadStats()" style="margin-bottom: 15px;">
+                <option>-- Select a code --</option>
+            </select>
+            <div id="stats-content"></div>
         </div>
     </div>
     
     <script>
-        // Get base URL dynamically
         const baseUrl = window.location.origin;
-        let currentQRData = null;
+        let currentQR = null;
         
-        // ============================================
-        // CHECK API STATUS
-        // ============================================
-        async function checkApiStatus() {
-            const statusDiv = document.getElementById('api-status');
-            const baseUrlSpan = document.getElementById('base-url');
-            
-            try {
-                const response = await fetch(`${baseUrl}/api/health`);
-                if (response.ok) {
-                    const data = await response.json();
-                    statusDiv.innerHTML = '✅ API is ONLINE';
-                    statusDiv.className = 'status online';
-                    baseUrlSpan.innerHTML = `
-                        <strong>Base URL:</strong> ${baseUrl}<br>
-                        <strong>API Endpoints:</strong><br>
-                        • POST ${baseUrl}/api/qr/generate<br>
-                        • GET ${baseUrl}/api/r/:code<br>
-                        • GET ${baseUrl}/api/qr/list<br>
-                        • PUT ${baseUrl}/api/qr/update/:code<br>
-                        • DELETE ${baseUrl}/api/qr/delete/:code
-                    `;
-                } else {
-                    throw new Error('API not responding');
-                }
-            } catch (error) {
-                statusDiv.innerHTML = '❌ API is OFFLINE - Make sure your server is running';
-                statusDiv.className = 'status offline';
-                baseUrlSpan.innerHTML = 'API not available';
-            }
-        }
-        
-        // ============================================
-        // GENERATE SINGLE QR
-        // ============================================
         async function generateQR() {
             const destinationUrl = document.getElementById('dest-url').value;
             const shortCode = document.getElementById('short-code').value;
@@ -335,7 +100,7 @@
             const qrLight = document.getElementById('qr-light').value;
             
             if (!destinationUrl) {
-                alert('Please enter a destination URL');
+                alert('Enter a destination URL');
                 return;
             }
             
@@ -356,25 +121,21 @@
                 });
                 
                 const data = await response.json();
+                if (data.error) throw new Error(data.error);
                 
-                if (data.error) {
-                    alert('Error: ' + data.error);
-                    return;
-                }
-                
-                currentQRData = data;
+                currentQR = data;
                 
                 document.getElementById('qr-result').innerHTML = `
-                    <div class="qr-preview">
-                        <img src="${data.qrImage}" alt="QR Code">
-                    </div>
+                    <div class="qr-preview"><img src="${data.qrImage}" alt="QR Code"></div>
                     <div class="code-info">
                         <strong>Short Code:</strong> ${data.shortCode}<br>
-                        <strong>Scan URL:</strong> ${baseUrl}/api/r/${data.shortCode}<br>
                         <strong>Destination:</strong> ${data.destinationUrl}
                     </div>
                 `;
-                document.getElementById('single-result').classList.add('show');
+                document.getElementById('result').classList.add('show');
+                
+                loadCodes();
+                loadStatsSelect();
                 
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -384,140 +145,36 @@
             }
         }
         
-        function downloadCurrentQR() {
-            if (currentQRData?.qrImage) {
+        function downloadQR() {
+            if (currentQR?.qrImage) {
                 const link = document.createElement('a');
-                link.download = `${currentQRData.shortCode}.png`;
-                link.href = currentQRData.qrImage;
+                link.download = `${currentQR.shortCode}.png`;
+                link.href = currentQR.qrImage;
                 link.click();
             }
         }
         
-        function copyScanUrl() {
-            if (currentQRData) {
-                const url = `${baseUrl}/api/r/${currentQRData.shortCode}`;
-                navigator.clipboard.writeText(url);
-                alert('Scan URL copied!');
+        function copyUrl() {
+            if (currentQR?.destinationUrl) {
+                navigator.clipboard.writeText(currentQR.destinationUrl);
+                alert('URL copied!');
             }
         }
         
-        // ============================================
-        // TEST REDIRECT
-        // ============================================
-        async function testRedirect() {
-            const shortCode = document.getElementById('test-code').value;
-            if (!shortCode) {
-                alert('Enter a short code');
-                return;
-            }
-            
-            const resultDiv = document.getElementById('redirect-result');
-            resultDiv.innerHTML = 'Testing...';
-            
-            try {
-                const response = await fetch(`${baseUrl}/api/r/${shortCode}`);
-                
-                if (response.redirected) {
-                    resultDiv.innerHTML = `
-                        <span class="success">✅ Redirect successful!</span><br>
-                        Redirected to: <a href="${response.url}" target="_blank">${response.url}</a>
-                    `;
-                } else if (response.status === 404) {
-                    resultDiv.innerHTML = '<span class="error">❌ QR code not found</span>';
-                } else {
-                    resultDiv.innerHTML = '<span class="error">❌ Redirect failed</span>';
-                }
-            } catch (error) {
-                resultDiv.innerHTML = '<span class="error">❌ Error: ' + error.message + '</span>';
-            }
-        }
-        
-        // ============================================
-        // BATCH GENERATOR
-        // ============================================
-        async function generateBatch() {
-            const prefix = document.getElementById('batch-prefix').value;
-            const start = parseInt(document.getElementById('batch-start').value);
-            const end = parseInt(document.getElementById('batch-end').value);
-            const destPattern = document.getElementById('batch-dest').value;
-            const qrDark = document.getElementById('qr-dark').value;
-            const qrLight = document.getElementById('qr-light').value;
-            
-            if (end - start > 50) {
-                alert('Max 50 codes per batch for testing');
-                return;
-            }
-            
-            document.getElementById('batch-progress').style.display = 'block';
-            document.getElementById('batch-codes').innerHTML = '';
-            
-            const results = [];
-            const total = end - start + 1;
-            
-            for (let i = start; i <= end; i++) {
-                const padded = String(i).padStart(String(end).length, '0');
-                const shortCode = `${prefix}${padded}`;
-                const destinationUrl = destPattern.replace('{code}', shortCode);
-                
-                const percent = ((i - start + 1) / total) * 100;
-                document.getElementById('progress-fill').style.width = `${percent}%`;
-                document.getElementById('progress-text').textContent = `Generated ${i - start + 1} of ${total}`;
-                
-                try {
-                    const response = await fetch(`${baseUrl}/api/qr/generate`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            destinationUrl,
-                            shortCode,
-                            qrDarkColor: qrDark,
-                            qrLightColor: qrLight
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    results.push(data);
-                    
-                    document.getElementById('batch-codes').innerHTML += `
-                        <div class="batch-item">
-                            ✅ ${data.shortCode} → ${data.destinationUrl}
-                        </div>
-                    `;
-                    
-                } catch (error) {
-                    document.getElementById('batch-codes').innerHTML += `
-                        <div class="batch-item error">
-                            ❌ ${shortCode}: ${error.message}
-                        </div>
-                    `;
-                }
-            }
-            
-            document.getElementById('batch-progress').style.display = 'none';
-            document.getElementById('batch-result').classList.add('show');
-            alert(`✅ Generated ${results.length} QR codes!`);
-        }
-        
-        // ============================================
-        // LOAD AND MANAGE CODES
-        // ============================================
         async function loadCodes() {
-            const codesDiv = document.getElementById('codes-list');
-            codesDiv.innerHTML = 'Loading...';
-            
             try {
                 const response = await fetch(`${baseUrl}/api/qr/list`);
                 const data = await response.json();
                 
                 if (!data.codes || data.codes.length === 0) {
-                    codesDiv.innerHTML = '<p>No QR codes yet. Generate some!</p>';
+                    document.getElementById('codes-list').innerHTML = '<p>No QR codes yet. Generate some!</p>';
                     return;
                 }
                 
                 let html = '';
                 for (const code of data.codes) {
                     html += `
-                        <div class="code-item" style="background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 10px;">
+                        <div class="code-item">
                             <div>
                                 <strong>${code.short_code}</strong><br>
                                 <small>${code.destination_url}</small><br>
@@ -531,10 +188,11 @@
                         </div>
                     `;
                 }
-                codesDiv.innerHTML = html;
+                document.getElementById('codes-list').innerHTML = html;
+                loadStatsSelect();
                 
             } catch (error) {
-                codesDiv.innerHTML = '<p>Error loading codes</p>';
+                document.getElementById('codes-list').innerHTML = '<p>Error loading codes</p>';
             }
         }
         
@@ -582,17 +240,47 @@
             }
         }
         
-        // ============================================
-        // INITIALIZE
-        // ============================================
-        checkApiStatus();
+        async function loadStatsSelect() {
+            try {
+                const response = await fetch(`${baseUrl}/api/qr/list`);
+                const data = await response.json();
+                let html = '<option>-- Select a code --</option>';
+                data.codes?.forEach(c => html += `<option value="${c.short_code}">${c.short_code} (${c.scan_count} scans)</option>`);
+                document.getElementById('stats-select').innerHTML = html;
+            } catch (error) {}
+        }
+        
+        async function loadStats() {
+            const shortCode = document.getElementById('stats-select').value;
+            if (!shortCode || shortCode === '-- Select a code --') return;
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/qr/stats/${shortCode}`);
+                const data = await response.json();
+                document.getElementById('stats-content').innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">${data.stats?.total_scans || 0}</div>
+                            <div class="stat-label">Total Scans</div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {}
+        }
+        
+        // Preset colors
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('qr-dark').value = btn.getAttribute('data-dark');
+                document.getElementById('qr-light').value = btn.getAttribute('data-light');
+            });
+        });
+        
+        // Initialize
         loadCodes();
         
-        // Auto-refresh every 30 seconds
-        setInterval(() => {
-            checkApiStatus();
-            loadCodes();
-        }, 30000);
+        console.log('✅ Luban Coffee QR System Ready');
     </script>
 </body>
 </html>
+EOF
