@@ -5,10 +5,6 @@
             "dest": "/api/index.js"
         },
         {
-            "src": "/",
-            "dest": "/public/test.html"
-        },
-        {
             "src": "/(.*)",
             "dest": "/public/$1"
         }

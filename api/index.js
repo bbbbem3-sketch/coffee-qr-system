@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Simple in-memory storage
+// In-memory storage
 let qrCodes = [];
 
 function generateShortCode(length = 8) {
@@ -20,7 +20,18 @@ function generateShortCode(length = 8) {
 }
 
 // ============================================
-// HEALTH CHECK (MUST WORK)
+// TEST ENDPOINT - VERIFY API IS WORKING
+// ============================================
+app.get('/api/ping', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        message: 'API is working!',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// ============================================
+// HEALTH CHECK
 // ============================================
 app.get('/api/health', (req, res) => {
     res.json({ 
@@ -31,28 +42,11 @@ app.get('/api/health', (req, res) => {
 });
 
 // ============================================
-// ROOT ENDPOINT (for testing)
-// ============================================
-app.get('/api', (req, res) => {
-    res.json({ 
-        message: 'QR API is working',
-        endpoints: [
-            'GET  /api/health',
-            'POST /api/qr/generate',
-            'GET  /api/r/:code',
-            'GET  /api/qr/list',
-            'PUT  /api/qr/update/:code',
-            'DELETE /api/qr/delete/:code'
-        ]
-    });
-});
-
-// ============================================
 // GENERATE QR CODE
 // ============================================
 app.post('/api/qr/generate', async (req, res) => {
     try {
-        console.log('📝 Generate request received:', req.body);
+        console.log('📝 Generate request:', req.body);
         
         const { destinationUrl, shortCode, qrDarkColor = '#000000', qrLightColor = '#FFFFFF' } = req.body;
         
@@ -70,7 +64,7 @@ app.post('/api/qr/generate', async (req, res) => {
         // Get base URL
         const baseUrl = process.env.VERCEL_URL 
             ? `https://${process.env.VERCEL_URL}` 
-            : 'https://coffee-qr-system.vercel.app';
+            : 'https://dynamic-qr-system-epunkcg69-bemnet-admassu-zelekes-projects.vercel.app';
         
         const qrContent = `${baseUrl}/api/r/${finalShortCode}`;
         console.log('📱 QR Content:', qrContent);
@@ -111,7 +105,7 @@ app.post('/api/qr/generate', async (req, res) => {
 });
 
 // ============================================
-// REDIRECT ENDPOINT
+// REDIRECT ENDPOINT - THIS IS WHAT QR CODES CALL
 // ============================================
 app.get('/api/r/:shortCode', (req, res) => {
     try {
@@ -125,7 +119,8 @@ app.get('/api/r/:shortCode', (req, res) => {
                 <html>
                 <body style="font-family: Arial; text-align: center; padding: 50px;">
                     <h1>❌ QR Code Not Found</h1>
-                    <p>Code "${shortCode}" does not exist.</p>
+                    <p>Code "${shortCode}" does not exist. Please generate it first.</p>
+                    <a href="/test.html">Go to QR Generator</a>
                 </body>
                 </html>
             `);
