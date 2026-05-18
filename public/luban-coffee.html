@@ -1,0 +1,238 @@
+cat > public/luban-coffee.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luban Coffee | Premium Ethiopian Coffee</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+        }
+        
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=1200');
+            background-size: cover;
+            background-position: center;
+            height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero-content h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+        
+        .hero-content p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: -50px auto 0;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .product {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .product:hover {
+            transform: translateY(-5px);
+        }
+        
+        .product-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .product h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .product p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4A2C1A;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .about {
+            background: #4A2C1A;
+            color: white;
+        }
+        
+        .about h2 {
+            color: white;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .feature {
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            .products {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-content">
+            <h1>☕ Luban Coffee</h1>
+            <p>Premium Ethiopian Coffee • Single Origin • Fresh Roasted</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2 style="text-align: center;">Our Premium Collection</h2>
+            <div class="products">
+                <div class="product">
+                    <div class="product-icon">🌋</div>
+                    <h3>Yirgacheffe</h3>
+                    <p>Floral notes • Bergamot • Jasmine</p>
+                    <div class="price">$24.99</div>
+                    <a href="#" class="btn">Shop Now</a>
+                </div>
+                <div class="product">
+                    <div class="product-icon">🏔️</div>
+                    <h3>Sidama</h3>
+                    <p>Berry • Citrus • Chocolate</p>
+                    <div class="price">$22.99</div>
+                    <a href="#" class="btn">Shop Now</a>
+                </div>
+                <div class="product">
+                    <div class="product-icon">🌄</div>
+                    <h3>Guji</h3>
+                    <p>Blueberry • Wine • Cocoa</p>
+                    <div class="price">$26.99</div>
+                    <a href="#" class="btn">Shop Now</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card about">
+            <h2>About Luban Coffee</h2>
+            <p style="margin-top: 15px; line-height: 1.6;">
+                Luban Coffee brings you the finest single-origin beans from Ethiopia's most renowned coffee regions. 
+                Sourced directly from small-scale farmers, each bean is carefully selected and roasted to perfection 
+                in small batches. Experience the authentic taste of Ethiopian coffee, known as the birthplace of coffee.
+            </p>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🌱</div>
+                    <h3>Single Origin</h3>
+                    <p>Direct from Ethiopian farms</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔥</div>
+                    <h3>Fresh Roasted</h3>
+                    <p>Roasted on order</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📦</div>
+                    <h3>Free Shipping</h3>
+                    <p>On orders over $35</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 style="text-align: center;">Special QR Offer</h2>
+            <p style="text-align: center; margin-top: 15px;">
+                Scan this QR code again to get <strong>15% off</strong> your first order!
+            </p>
+            <p style="text-align: center; margin-top: 15px;">
+                Use code: <strong style="background: #4A2C1A; color: white; padding: 5px 10px; border-radius: 10px;">LUBAN15</strong>
+            </p>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2024 Luban Coffee. All rights reserved.</p>
+        <p style="margin-top: 10px;">📍 Addis Ababa, Ethiopia | 📞 +251 123 456 789</p>
+    </footer>
+</body>
+</html>
+EOF
