@@ -24,7 +24,7 @@ const downloadsDir = path.join(__dirname, 'downloads');
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(express.static(path.join(__dirname, '../public')));
 app.use('/qr-codes', express.static(qrDir));
 app.use('/barcodes', express.static(barcodeDir));
 app.use('/temp', express.static(tempDir));
